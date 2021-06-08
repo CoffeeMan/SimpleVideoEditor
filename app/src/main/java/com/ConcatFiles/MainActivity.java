@@ -5,22 +5,35 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 
+import com.ConcatFiles.data.CroppedVideoContract;
+import com.ConcatFiles.data.VideoDbHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
     Uri selectedUri;
+    VideoDbHelper vDbHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         requestPermission();
+        //vDbHelper = new VideoDbHelper(this);
+
+
     }
 
 
@@ -52,5 +65,58 @@ public class MainActivity extends AppCompatActivity {
     public void buttonMergeListener(View view) {
         Intent i = new Intent(MainActivity.this, MergeVideos.class);
         startActivity(i);
+    }
+
+    private void testInsert(){
+        SQLiteDatabase db = vDbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_OWN_PATH, "DCIM/");
+        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_BASE_PATH, "DCIM/VIDEOS");
+        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_DURATION, 10);
+        long newRowId = db.insert(CroppedVideoContract.CropperdVideosEntry.TABLE_NAME, null, values);
+
+    }
+
+    private void displayDatabaseInfo() {
+        SQLiteDatabase db = vDbHelper.getReadableDatabase();//открытие базы для чтения
+        List<String> list = new ArrayList<>();
+        String[] projection = {
+                CroppedVideoContract.CropperdVideosEntry._ID,
+                CroppedVideoContract.CropperdVideosEntry.COLUMN_OWN_PATH,
+                CroppedVideoContract.CropperdVideosEntry.COLUMN_BASE_PATH,
+                CroppedVideoContract.CropperdVideosEntry.COLUMN_DURATION
+        };
+
+        Cursor cursor = db.query(
+                CroppedVideoContract.CropperdVideosEntry.TABLE_NAME,   // таблица
+                projection,            // столбцы
+                null,                  // столбцы для условия WHERE
+                null,                  // значения для условия WHERE
+                null,                  // Don't group the rows
+                null,                  // Don't filter by row groups
+                null);  // порядок сортировки
+        try {
+
+
+            int idColumnIndex = cursor.getColumnIndex(CroppedVideoContract.CropperdVideosEntry._ID);
+            int columnOwnPathIndex = cursor.getColumnIndex(CroppedVideoContract.CropperdVideosEntry.COLUMN_OWN_PATH);
+            int columnBasePathIndex = cursor.getColumnIndex(CroppedVideoContract.CropperdVideosEntry.COLUMN_BASE_PATH);
+            int columnDurationIndex = cursor.getColumnIndex(CroppedVideoContract.CropperdVideosEntry.COLUMN_DURATION);
+            while (cursor.moveToNext()) {
+                // Используем индекс для получения строки или числа
+                int currentID = cursor.getInt(idColumnIndex);
+                String currentOwnPath = cursor.getString(columnOwnPathIndex);
+                String currentBasePath = cursor.getString(columnBasePathIndex);
+                int currentDuration = cursor.getInt(columnDurationIndex);
+                // Выводим значения каждого столбца
+                list.add("\n" + currentID + " - " +
+                        currentOwnPath + " - " +
+                        currentBasePath + " - " +
+                        currentDuration);
+            }
+        } finally {
+            cursor.close();
+        }
     }
 }

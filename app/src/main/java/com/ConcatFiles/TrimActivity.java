@@ -1,9 +1,11 @@
 package com.ConcatFiles;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,6 +27,10 @@ import android.widget.VideoView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.ConcatFiles.data.CroppedVideoContract;
+import com.ConcatFiles.data.MergedVideosContract;
+import com.ConcatFiles.data.VideoDbHelper;
+
 import org.florescu.android.rangeseekbar.RangeSeekBar;
 
 import java.io.File;
@@ -42,7 +48,9 @@ public class TrimActivity extends AppCompatActivity {
     String filePrefix;
     String[] command;
     File dest;
-    String original_path;
+    String original_path, path;
+
+    VideoDbHelper vDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +73,12 @@ public class TrimActivity extends AppCompatActivity {
         }
 
         setListeners();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        vDbHelper = new VideoDbHelper(this);
     }
 
     private void setListeners() {
@@ -152,6 +166,9 @@ public class TrimActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     filePrefix = input.getText().toString();
                     trimVideo(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000, filePrefix);
+
+                    insertTrimVideo();
+
                     Intent myIntent = new Intent(TrimActivity.this, ProgressBarActivity.class);
                     myIntent.putExtra("duration", duration);
                     myIntent.putExtra("command", command);
@@ -175,7 +192,8 @@ public class TrimActivity extends AppCompatActivity {
         }
         filePrefix = filNam;
         String fileExt = ".mp4";
-        dest = new File(folder, filePrefix + fileExt);
+        path = Environment.getExternalStorageDirectory() + "/TrimVideos" + filePrefix + fileExt;
+        dest = new File(folder, path);
         original_path = getRealPathFromUri(getApplicationContext(), uri);
 
         duration = (endMs - startMs) / 1000;
@@ -206,6 +224,16 @@ public class TrimActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_trim, menu);
         return true;
+    }
+
+    public void insertTrimVideo() {
+        SQLiteDatabase db = vDbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_OWN_PATH, path);
+        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_BASE_PATH, original_path);
+        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_DURATION, duration);
+        long newRowId = db.insert(CroppedVideoContract.CropperdVideosEntry.TABLE_NAME, null, values);
     }
 
 }

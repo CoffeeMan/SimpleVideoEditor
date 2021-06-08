@@ -3,11 +3,13 @@ package com.ConcatFiles;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +28,9 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 
+import com.ConcatFiles.data.CroppedVideoContract;
+import com.ConcatFiles.data.MergedVideosContract;
+import com.ConcatFiles.data.VideoDbHelper;
 import com.googlecode.mp4parser.BasicContainer;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
@@ -45,9 +50,8 @@ public class MergeVideos extends AppCompatActivity {
     Button button1, button2;
     Uri firstUri, secondUri;
     int durationFirstVideo, durationSecondVideo;
-    String[] command;
     String filePrefix, pathVideo1, pathVideo2;
-    File dest;
+    VideoDbHelper vDbHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +60,12 @@ public class MergeVideos extends AppCompatActivity {
         img2 = (ImageView) findViewById(R.id.imageView2);
         button1 = (Button) findViewById(R.id.button1);
         button2 = (Button) findViewById(R.id.button2);
+    }
 
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        vDbHelper = new VideoDbHelper(this);
     }
 
     public void button1Listener(View view) {
@@ -141,12 +149,11 @@ public class MergeVideos extends AppCompatActivity {
         if (!folder.exists()){
             folder.mkdir();
         }
-        //TODO
         filePrefix = filNam;
         String fileExt = ".mp4";
         pathVideo1 = getRealPathFromUri(getApplicationContext(), firstUri);
         pathVideo2 = getRealPathFromUri(getApplicationContext(), secondUri);
-
+        String path = Environment.getExternalStorageDirectory()+ "/MergeVideos/"+filNam + ".mp4";
         try {
             Movie[] movies = new Movie[]{
                 MovieCreator.build(pathVideo1),
@@ -175,8 +182,9 @@ public class MergeVideos extends AppCompatActivity {
             }
             BasicContainer out =  (BasicContainer) new DefaultMp4Builder().build(result);
             WritableByteChannel fc = new RandomAccessFile(
-                    String.format(Environment.getExternalStorageDirectory()+ "/MergeVideos/"+filNam + ".mp4"), "rw").getChannel();
+                    String.format(path), "rw").getChannel();
             out.writeContainer(fc);
+            insertMergeVideo(path);
             fc.close();
             Toast.makeText(this, "Videos merge successful", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
@@ -208,5 +216,17 @@ public class MergeVideos extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_merge, menu);
         return true;
+    }
+
+    public void insertMergeVideo(String path){
+        SQLiteDatabase db = vDbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(MergedVideosContract.mergedVideosEntry.COLUMN_OWN_PATH, path);
+        values.put(MergedVideosContract.mergedVideosEntry.COLUMN_BASE_PATH_FIRST, pathVideo1);
+        values.put(MergedVideosContract.mergedVideosEntry.COLUMN_BASE_PATH_SECOND, pathVideo2);
+        values.put(MergedVideosContract.mergedVideosEntry.COLUMN_DURATION, (durationFirstVideo + durationSecondVideo) / 1000);
+
+        long newRowId = db.insert(MergedVideosContract.mergedVideosEntry.TABLE_NAME, null, values);
     }
 }
