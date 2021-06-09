@@ -193,7 +193,7 @@ public class TrimActivity extends AppCompatActivity {
         filePrefix = filNam;
         String fileExt = ".mp4";
         path = Environment.getExternalStorageDirectory() + "/TrimVideos" + filePrefix + fileExt;
-        dest = new File(folder, path);
+        dest = new File(folder, filePrefix + fileExt);
         original_path = getRealPathFromUri(getApplicationContext(), uri);
 
         duration = (endMs - startMs) / 1000;

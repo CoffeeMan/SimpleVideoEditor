@@ -18,22 +18,22 @@ import com.ConcatFiles.data.CroppedVideoContract;
 import com.ConcatFiles.data.VideoDbHelper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
 
     Uri selectedUri;
     VideoDbHelper vDbHelper;
-
+    Map<Integer, String[]> mergedData = new HashMap<>();
+    Map<Integer, String[]> trimData = new HashMap<>();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         requestPermission();
-        //vDbHelper = new VideoDbHelper(this);
-
-
     }
 
 
@@ -63,19 +63,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void buttonMergeListener(View view) {
-        Intent i = new Intent(MainActivity.this, MergeVideos.class);
+        Intent i = new Intent(MainActivity.this, MergeVideosActivity.class);
         startActivity(i);
     }
 
-    private void testInsert(){
-        SQLiteDatabase db = vDbHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_OWN_PATH, "DCIM/");
-        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_BASE_PATH, "DCIM/VIDEOS");
-        values.put(CroppedVideoContract.CropperdVideosEntry.COLUMN_DURATION, 10);
-        long newRowId = db.insert(CroppedVideoContract.CropperdVideosEntry.TABLE_NAME, null, values);
-
+    public void buttonAllVideosListener(View view) {
+        Intent i = new Intent(MainActivity.this, AllVideosActivity.class);
+        startActivity(i);
     }
 
     private void displayDatabaseInfo() {
@@ -119,4 +113,6 @@ public class MainActivity extends AppCompatActivity {
             cursor.close();
         }
     }
+
+
 }

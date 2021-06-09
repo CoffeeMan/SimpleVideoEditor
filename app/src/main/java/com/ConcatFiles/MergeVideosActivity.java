@@ -28,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 
-import com.ConcatFiles.data.CroppedVideoContract;
 import com.ConcatFiles.data.MergedVideosContract;
 import com.ConcatFiles.data.VideoDbHelper;
 import com.googlecode.mp4parser.BasicContainer;
@@ -45,7 +44,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MergeVideos extends AppCompatActivity {
+public class MergeVideosActivity extends AppCompatActivity {
     ImageView img1, img2;
     Button button1, button2;
     Uri firstUri, secondUri;
@@ -56,10 +55,10 @@ public class MergeVideos extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_merge_videos);
-        img1 = (ImageView) findViewById(R.id.imageView1);
-        img2 = (ImageView) findViewById(R.id.imageView2);
-        button1 = (Button) findViewById(R.id.button1);
-        button2 = (Button) findViewById(R.id.button2);
+        img1 = findViewById(R.id.imageView1);
+        img2 = findViewById(R.id.imageView2);
+        button1 = findViewById(R.id.button1);
+        button2 = findViewById(R.id.button2);
     }
 
     @Override
@@ -110,12 +109,12 @@ public class MergeVideos extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         if (item.getItemId() == R.id.merge){
-            final AlertDialog.Builder alert = new AlertDialog.Builder(MergeVideos.this);
-            LinearLayout linearLayout = new LinearLayout(MergeVideos.this);
+            final AlertDialog.Builder alert = new AlertDialog.Builder(MergeVideosActivity.this);
+            LinearLayout linearLayout = new LinearLayout(MergeVideosActivity.this);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             lp.setMargins(50, 0, 50, 100);
-            final EditText input = new EditText(MergeVideos.this);
+            final EditText input = new EditText(MergeVideosActivity.this);
             input.setLayoutParams(lp);
             input.setGravity(Gravity.TOP|Gravity.START);
             input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);

@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ConcatFiles">
-        <activity android:name=".MergeVideos"></activity>
+        <activity android:name=".AllVideosActivity"></activity>
+        <activity android:name=".MergeVideosActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
