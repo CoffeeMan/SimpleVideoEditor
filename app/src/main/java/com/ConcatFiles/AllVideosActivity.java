@@ -22,8 +22,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ConcatFiles.data.CountVideosContract;
 import com.ConcatFiles.data.CroppedVideoContract;
 import com.ConcatFiles.data.MergedVideosContract;
 import com.ConcatFiles.data.VideoDbHelper;
@@ -39,7 +41,9 @@ public class AllVideosActivity extends AppCompatActivity {
     List<String> trimData = new ArrayList<>();
     ListView listViewTrim;
     ListView listViewMerge;
-
+    SQLiteDatabase db;
+    TextView tittle1;
+    TextView tittle2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +51,8 @@ public class AllVideosActivity extends AppCompatActivity {
 
         listViewTrim = findViewById(R.id.listTrim);
         listViewMerge = findViewById(R.id.listMerge);
-
+        tittle1 = findViewById(R.id.textTittle1);
+        tittle2 = findViewById(R.id.textTittle2);
         ArrayAdapter<String> adapter = new ArrayAdapter(this,
                 R.layout.list_item, R.id.textViewItem, trimData);
         listViewTrim.setAdapter(adapter);
@@ -109,7 +114,9 @@ public class AllVideosActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         vDbHelper = new VideoDbHelper(this);
+        db = vDbHelper.getReadableDatabase();
         getDbData();
+        getDbCount();
     }
 
     @Override
@@ -149,11 +156,33 @@ public class AllVideosActivity extends AppCompatActivity {
     }
 
 
+    private void getDbCount() {
+        String[] projection = {
+                CountVideosContract.CountVideosEntry.COUNT_TRIM,
+                CountVideosContract.CountVideosEntry.COUNT_MERGE
+        };
 
+        Cursor cursor1 = db.query(
+                CountVideosContract.CountVideosEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null);
+        int columnTrim = cursor1.getColumnIndex(CountVideosContract.CountVideosEntry.COUNT_TRIM);
+        int columnMerge = cursor1.getColumnIndex(CountVideosContract.CountVideosEntry.COUNT_MERGE);
+
+        while (cursor1.moveToNext()) {
+            int countTrim = cursor1.getInt(columnTrim);
+            int countMerge = cursor1.getInt(columnMerge);
+
+            tittle1.setText(tittle1.getText() + ": " + String.valueOf(countTrim));
+            tittle2.setText(tittle2.getText() + ": " + String.valueOf(countMerge));
+        }
+    }
 
     private void getDbData() {
-        SQLiteDatabase db = vDbHelper.getReadableDatabase();
-
         String[] projectionMerge = {
                 MergedVideosContract.mergedVideosEntry._ID,
                 MergedVideosContract.mergedVideosEntry.COLUMN_OWN_PATH,
