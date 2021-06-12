@@ -48,7 +48,7 @@
         android:layout_width="@dimen/_300sdp"
         android:layout_height="@dimen/_100sdp"
         android:onClick="buttonAllVideosListener"
-        android:text="My works"
+        android:text="Journal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonMerge" />
