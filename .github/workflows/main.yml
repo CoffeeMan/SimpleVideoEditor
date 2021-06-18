@@ -28,6 +28,11 @@ jobs:
       run: |
         ./gradlew test
         ./gradlew assembleRelease
+    - name: Upload dotnet test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: Upload code style logs
+        path: ./app/build/reports/lint-results.html
     - name: Upload APK
       uses: actions/upload-artifact@v2
       with:
