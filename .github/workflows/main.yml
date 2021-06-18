@@ -24,7 +24,7 @@ jobs:
       run: ./gradlew build
     - name: Check code style
       run: ./gradlew lint
-    - name: Build release APK and AAB after test
+    - name: Build release APK after test
       run: |
         ./gradlew test
         ./gradlew assembleRelease
@@ -38,3 +38,9 @@ jobs:
       with:
         name: app-release.apk
         path: app/build/outputs/apk/release/app-release-unsigned.apk
+    - name: Unit Test
+      run: ./gradlew testDebugUnitTest
+
+    - name: Android Test Report
+      uses: asadmansr/android-test-report-action@v1.2.0
+      if: ${{ always() }}
