@@ -22,6 +22,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Check code style
+      run: ./gradlew lint
     - name: Build release APK and AAB after test
       run: |
         ./gradlew test
